@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../model/user.model");
+const User = require("../models/user.model");
 require("dotenv").config();
 
 // Auth middleware
@@ -46,97 +46,30 @@ require("dotenv").config();
 exports.auth = async (req, res, next) => {
   try {
     const token =
-      req.body.token ||
-      req.cookies.token ||
-      req.header("Authorization")?.replace("Bearer ", ""); // UNCOMMENT THIS
+      req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
 
-    // Check that token is empty or not
+    // Check token
     if (!token) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Token is missing",
       });
     }
 
     // Verify token
-    try {
-      const decode = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("Decoded token:", decode);
-      req.user = decode;
-    } catch (error) {
-      console.log("Token verification error:", error.message);
-      return res.status(401).json({
-        success: false,
-        message: "Token is invalid",
-      });
-    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    console.log("Decoded token:", decoded);
+
+    req.user = decoded;
 
     next();
   } catch (error) {
-    console.log("Auth middleware error:", error);
+    console.log("Auth middleware error:", error.message);
+
     return res.status(401).json({
       success: false,
-      message: "Something went wrong while validating token",
-    });
-  }
-};
-
-// isStudent middleware
-exports.isStudent = async (req, res, next) => {
-  try {
-    if (req.user.accountType !== "Student") {
-      return res.status(401).json({
-        success: false,
-        message: "this route is protected for student only",
-      });
-    }
-    next();
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "user rule cannot be varified , please try again",
-    });
-  }
-};
-
-// isInstructer middleware
-exports.isInstructer = async (req, res, next) => {
-  try {
-    if (
-      req.user.accountType !== "Instructer" &&
-      req.user.accountType !== "Instructor"
-    ) {
-      return res.status(401).json({
-        success: false,
-        message: "this route is protected for instructer only",
-      });
-    }
-    next();
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "user rule cannot be varified , please try again",
-    });
-  }
-};
-
-// isAdmin middleware
-exports.isAdmin = async (req, res, next) => {
-  try {
-    if (req.user.accountType !== "Admin") {
-      return res.status(401).json({
-        success: false,
-        message: "this route is protected for admin only",
-      });
-    }
-    next();
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "user rule cannot be varified , please try again",
+      message: "Token is invalid or expired",
     });
   }
 };

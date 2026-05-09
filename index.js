@@ -7,9 +7,11 @@ const cors = require("cors");
 const { cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
 const dotenv = require("dotenv");
+const authRoutes = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
 
 dotenv.config();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
 //database connect
 database.connect();
@@ -18,7 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -33,12 +35,8 @@ app.use(
 cloudinaryConnect();
 
 //routes
-// app.use("/api/v1/auth", userRoutes);
-// app.use("/api/v1/profile", profileRoutes);
-// app.use("/api/v1/course", courseRoutes);
-// app.use("/api/v1/payment", paymentRoutes);
-// app.use("/api/v1/reach", contactUsRoute);
-
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
 //def route
 
 app.get("/", (req, res) => {
