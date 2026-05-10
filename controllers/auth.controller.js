@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
-
+const { generateOTP } = require("../utils/helpers");
+const { sendPasswordResetEmail } = require("../utils/email");
 // Generate Token
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -138,7 +139,6 @@ exports.signin = async (req, res) => {
   }
 };
 
-
 exports.signout = async (req, res) => {
   try {
     res.clearCookie("token", {
@@ -157,6 +157,95 @@ exports.signout = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server Error",
+    });
+  }
+};
+
+exports.sendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Generate 6-digit OTP
+    // const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = generateOTP(4).toUpperCase().toString();
+
+    user.otp = otp;
+    user.otpExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    // Send OTP email
+    await sendPasswordResetEmail(user, otp);
+    console.log("====> otp", otp);
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset OTP sent to your email",
+    });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+// verifyOtp
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    // Check required fields
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required",
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+
+    // Check user exists
+    if (!user || user.resetOtp !== otp || user.otpExpires) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Verify OTP
+    if (user.otp !== otp) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    // OTP verified successfully
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "OTP verification failed",
+      error: error.message,
     });
   }
 };
