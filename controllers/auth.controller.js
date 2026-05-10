@@ -267,7 +267,7 @@ exports.resetPassword = async (req, res) => {
     const { email, otp, password, confirmPassword } = req.body;
 
     // Validate fields
-    if (!email || !otp || !password || !confirmPassword) {
+    if (!email || !otp || !password) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
