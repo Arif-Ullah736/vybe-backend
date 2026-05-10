@@ -3,6 +3,8 @@ const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const { generateOTP } = require("../utils/helpers");
 const { sendPasswordResetEmail } = require("../utils/email");
+const { Op } = require("sequelize");
+
 // Generate Token
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -218,23 +220,21 @@ exports.verifyOtp = async (req, res) => {
     }
 
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ where: { email } });
 
     // Check user exists
-    if (!user || user.resetOtp !== otp || user.otpExpires) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-
-    // Verify OTP
-    if (user.otp !== otp) {
-      return res.status(401).json({
+    if (!user || user.resetOtp !== otp || user.otpExpires < Date.now()) {
+      return res.status(400).json({
         success: false,
         message: "Invalid OTP",
       });
     }
+
+    user.isOtpVirified = true;
+    user.resetOtp = undefined;
+    user.otpExpires = undefined;
+
+    await user.save();
 
     // OTP verified successfully
     return res.status(200).json({
@@ -246,6 +246,59 @@ exports.verifyOtp = async (req, res) => {
       success: false,
       message: "OTP verification failed",
       error: error.message,
+    });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password, confirmPassword } = req.body;
+
+    if (!email || !otp || !password || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match",
+      });
+    }
+
+    const user = await User.findOne({
+      where: {
+        email,
+        resetOtp: String(otp),
+        otpExpires: { [Op.gt]: new Date() },
+      },
+    });
+
+    if (!user || !user.isOtpVirified) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    // Update password
+    user.password = await bcrypt.hash(password, 10);
+    user.resetOtp = null;
+    user.otpExpires = null;
+    user.isOtpVirified = false;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
     });
   }
 };
