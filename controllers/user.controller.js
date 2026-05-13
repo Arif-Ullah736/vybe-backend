@@ -27,3 +27,21 @@ exports.getUser = async (req, res) => {
     });
   }
 };
+
+exports.suggestedUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      message: "users fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "something went wrong while  fetching users",
+    });
+  }
+};
