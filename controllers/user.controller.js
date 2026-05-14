@@ -30,7 +30,11 @@ exports.getUser = async (req, res) => {
 
 exports.suggestedUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select("-password");
+    const currentUserId = req.userId;
+
+    const users = await User.find({
+      _id: { $ne: currentUserId },
+    }).select("-password");
 
     return res.status(200).json({
       success: true,
@@ -39,9 +43,10 @@ exports.suggestedUsers = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+
     return res.status(500).json({
       success: false,
-      message: "something went wrong while  fetching users",
+      message: "something went wrong while fetching users",
     });
   }
 };
