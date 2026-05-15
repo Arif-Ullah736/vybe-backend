@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const mediaUploader = require("../utils/imageUploader");
 
 exports.getUser = async (req, res) => {
   try {
@@ -47,6 +48,86 @@ exports.suggestedUsers = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "something went wrong while fetching users",
+    });
+  }
+};
+
+exports.editProfile = async (req, res) => {
+  try {
+    const { name, userName, bio, profession, gender } = req.body;
+    const userId = req.user.id;
+
+    // taking image from user
+    const file = req.file;
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "user not found",
+      });
+    }
+
+    const sameUserWithUserName =
+      await User.findOne(userName).select("-password");
+
+    if (sameUserWithUserName && sameUserWithUserName._id !== userId) {
+      return res.status(400).json({
+        success: false,
+        message: "user name already exist",
+      });
+    }
+
+    //  upload image to cloudinary
+    let profileImage;
+    if (file) {
+      profileImage = await mediaUploader(req.file.path);
+    }
+
+    user.name = name;
+    user.bio = bio;
+    user.profession = profession;
+    user.profileImage = profileImage;
+    user.gender = gender;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "profile updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "something went wrong while updating profile",
+    });
+  }
+};
+
+exports.getProfile = async (req, res) => {
+  try {
+    const userName = req.params.userName;
+    const profile = await User.findOne(userName).select("-password");
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        message: "user not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "profile fetched successfully",
+      data: profile,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "something went wrong while fetching user",
     });
   }
 };

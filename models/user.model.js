@@ -31,7 +31,17 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    bio: {
+      type: String,
+    },
 
+    profession: {
+      type: String,
+    },
+    gender: {
+      type: String,
+      enum: ["Male", "Femal", "Other"],
+    },
     followers: [
       {
         type: mongoose.Schema.Types.ObjectId,
