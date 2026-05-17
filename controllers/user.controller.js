@@ -78,8 +78,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// controllers/user.controller.js
-
 exports.editProfile = async (req, res) => {
   try {
     const { name, userName, bio, profession, gender } = req.body;
