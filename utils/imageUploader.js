@@ -1,16 +1,16 @@
-const multer = require("multer");
-const path = require("path");
+// utils/imageUploader.js
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
+const cloudinary = require("cloudinary").v2;
 
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
+exports.uploadImageToCloudinary = async (filePath, folder) => {
+  try {
+    const response = await cloudinary.uploader.upload(filePath, {
+      folder: folder,
+    });
 
-const upload = multer({ storage });
-
-module.exports = upload;
+    return response;
+  } catch (error) {
+    console.log("Cloudinary upload error:", error);
+    throw error;
+  }
+};

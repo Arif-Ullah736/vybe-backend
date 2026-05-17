@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["Male", "Femal", "Other"],
+      enum: ["male", "female", "other"],
     },
     followers: [
       {
