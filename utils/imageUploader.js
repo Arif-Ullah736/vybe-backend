@@ -1,26 +1,16 @@
-const cloudinary = require("../config/cloudinary");
-const fs = require("fs");
+const multer = require("multer");
+const path = require("path");
 
-const mediaUploader = async (filePath, folder = "uploads") => {
-  try {
-    // upload image/video to cloudinary
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder,
-      resource_type: "auto", // auto detect image or video
-    });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
 
-    // delete file from multer uploads folder
-    fs.unlinkSync(filePath);
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
 
-    return result;
-  } catch (error) {
-    // if upload fails then also delete file
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+const upload = multer({ storage });
 
-    throw error;
-  }
-};
-
-module.exports = mediaUploader;
+module.exports = upload;
