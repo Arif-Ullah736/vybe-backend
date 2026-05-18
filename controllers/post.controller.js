@@ -89,3 +89,41 @@ exports.uploadPost = async (req, res) => {
     });
   }
 };
+
+exports.getAllPosts = async (req, res) => {
+  try {
+    // =========================
+    // 1. Fetch all posts
+    // =========================
+    const posts = await Post.find()
+      .populate("author", "name email profileImage")
+      .sort({ createdAt: -1 }); // newest first
+
+    // =========================
+    // 2. Check if posts exist
+    // =========================
+    if (!posts || posts.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No posts found",
+        data: [],
+      });
+    }
+
+    // =========================
+    // 3. Response
+    // =========================
+    return res.status(200).json({
+      success: true,
+      message: "Posts fetched successfully",
+      data: posts,
+    });
+  } catch (error) {
+    console.log("❌ getAllPosts error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};
