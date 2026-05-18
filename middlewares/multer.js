@@ -1,6 +1,11 @@
 const multer = require("multer");
 
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+  destination: "./public/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
 
 const upload = multer({
   storage,
