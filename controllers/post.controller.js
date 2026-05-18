@@ -1,4 +1,5 @@
 const Post = require("../models/post.model");
+const User = require("../models/user.model");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 exports.uploadPost = async (req, res) => {
@@ -29,14 +30,6 @@ exports.uploadPost = async (req, res) => {
       });
     }
 
-    // =========================
-    // 3. Debug file (important)
-    // =========================
-    console.log("📁 File received:", file);
-
-    // =========================
-    // 4. Upload to Cloudinary
-    // =========================
     let cloudinaryResult;
 
     try {
@@ -67,6 +60,10 @@ exports.uploadPost = async (req, res) => {
       caption: caption || "",
     });
 
+    //  save post in user
+    const user = await User.findById(req.user.id);
+    user.posts.push(post._id);
+    await user.save();
     // =========================
     // 6. Populate author safely
     // =========================
