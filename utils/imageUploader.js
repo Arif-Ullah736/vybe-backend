@@ -6,6 +6,9 @@ exports.uploadImageToCloudinary = async (filePath, folder) => {
   try {
     const response = await cloudinary.uploader.upload(filePath, {
       folder: folder,
+
+      // Automatically detect image or video
+      resource_type: "auto",
     });
 
     return response;
