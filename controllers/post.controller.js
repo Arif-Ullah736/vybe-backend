@@ -124,3 +124,138 @@ exports.getAllPosts = async (req, res) => {
     });
   }
 };
+
+exports.likePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.user.id;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    const alreadyLiked = post.likes.includes(userId);
+
+    if (alreadyLiked) {
+      // Unlike
+      post.likes = post.likes.filter((id) => id.toString() !== userId);
+
+      await post.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Post unliked",
+        likesCount: post.likes.length,
+      });
+    }
+
+    // Like
+    post.likes.push(userId);
+
+    await post.save();
+    await post.populate("author", "name email profileImage");
+
+    res.status(200).json({
+      success: true,
+      message: "Post liked",
+      likesCount: post.likes.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.addComment = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { message } = req.body;
+
+    const userId = req.user.id;
+
+    if (!message || message.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Comment cannot be empty",
+      });
+    }
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    const comment = {
+      author: userId,
+      message: message.trim(),
+    };
+
+    post.comments.push(comment);
+
+    await post.save();
+
+    await post.populate("comments.author", "name email profileImage");
+
+    res.status(201).json({
+      success: true,
+      message: "Comment added",
+      comments: post.comments,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.savedPosts = async (req, res) => {
+  try {
+    const postId = req.params.postId;
+    const userId = req.user.id;
+
+    // find post
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "post not found",
+      });
+    }
+
+    // check post already saved
+    const user = await User.findById(userId);
+    const alreadySaved = user.saved.includes(postId);
+    if (alreadySaved) {
+      user.saved = user.saved.filter((id) => id.toString() !== postId);
+      await user.save();
+      return res.status(200).json({
+        success: true,
+        message: "post unsaved",
+      });
+    } else {
+      user.saved.push(postId);
+      await user.save();
+      return res.status(200).json({
+        success: true,
+        message: "post saved",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};
