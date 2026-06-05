@@ -1,4 +1,5 @@
 const Loop = require("../models/loop.model");
+const User = require("../models/user.model");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 exports.uploadLoop = async (req, res) => {
@@ -55,7 +56,7 @@ exports.uploadLoop = async (req, res) => {
     // =========================
     const loop = await Loop.create({
       author: req.user.id,
-      video: cloudinaryResult.secure_url,
+      media: cloudinaryResult.secure_url,
       caption: caption || "",
     });
 
@@ -68,7 +69,7 @@ exports.uploadLoop = async (req, res) => {
       user.loops = [];
     }
 
-    user.loops.push(loop._id);
+    user.loop.push(loop._id);
     await user.save();
 
     // =========================

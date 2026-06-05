@@ -7,7 +7,7 @@ exports.getUser = async (req, res) => {
     const userId = req.user._id || req.user.id;
     console.log("user id ", userId);
 
-    const user = await User.findById(userId).populate("posts,loops");
+    const user = await User.findById(userId).populate("posts").populate("loop");
     if (!user) {
       return res.status(404).json({
         success: false,
