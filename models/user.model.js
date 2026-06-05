@@ -77,7 +77,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
-    storyLoop: {
+    story: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Story",
     },
