@@ -93,3 +93,51 @@ exports.uploadLoop = async (req, res) => {
     });
   }
 };
+
+exports.likeLoop = async (req, res) => {
+  try {
+    const { loopId } = req.params;
+    const userId = req.user.id;
+
+    const loop = await Loop.findById(loopId);
+
+    if (!loop) {
+      return res.status(404).json({
+        success: false,
+        message: "Loop not found",
+      });
+    }
+
+    const alreadyLiked = loop.likes.includes(userId);
+
+    if (alreadyLiked) {
+      // Unlike
+      loop.likes = loop.likes.filter((id) => id.toString() !== userId);
+
+      await loop.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Loop unliked",
+        likesCount: loop.likes.length,
+      });
+    }
+
+    // Like
+    loop.likes.push(userId);
+
+    await loop.save();
+    await loop.populate("author", "name email profileImage");
+
+    return res.status(200).json({
+      success: true,
+      message: "Loop liked",
+      likesCount: loop.likes.length,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
