@@ -60,9 +60,8 @@ exports.uploadStory = async (req, res) => {
     });
 
     // 7. Populate author
-    await story
-      .populate("author", "name userName profileImage")
-      .populate("viewers", "name userName profileImage");
+    await story.populate("author", "name userName profileImage");
+    await story.populate("viewers", "name userName profileImage");
 
     return res.status(201).json({
       success: true,
@@ -144,6 +143,7 @@ exports.getStoryByUsername = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "User fetched successfully",
+      data: story,
     });
   } catch (error) {
     return res.status(500).json({

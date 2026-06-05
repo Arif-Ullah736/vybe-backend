@@ -34,5 +34,5 @@ const storySchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
-module.exports = mongoose.model("Story", storySchema);
+const Strory = mongoose.model("Story", storySchema);
+module.exports = Strory;
