@@ -11,6 +11,7 @@ const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const postRoutes = require("./routes/post.routes");
 const loopRoutes = require("./routes/loop.routes");
+const storyRoutes = require("./routes/story.routes");
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/post", postRoutes);
 app.use("/api/v1/loop", loopRoutes);
+app.use("/api/v1/story", storyRoutes);
 
 app.get("/", (req, res) => {
   return res.json({
