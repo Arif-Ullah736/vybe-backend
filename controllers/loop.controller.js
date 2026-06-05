@@ -141,3 +141,50 @@ exports.likeLoop = async (req, res) => {
     });
   }
 };
+
+exports.addLoopComment = async (req, res) => {
+  try {
+    const { loopId } = req.params;
+    const { message } = req.body;
+
+    const userId = req.user.id;
+
+    if (!message || message.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Comment cannot be empty",
+      });
+    }
+
+    const loop = await Loop.findById(loopId);
+
+    if (!loop) {
+      return res.status(404).json({
+        success: false,
+        message: "Loop not found",
+      });
+    }
+
+    const comment = {
+      author: userId,
+      message: message.trim(),
+    };
+
+    loop.comments.push(comment);
+
+    await loop.save();
+
+    await loop.populate("comments.author", "name email profileImage");
+
+    return res.status(201).json({
+      success: true,
+      message: "Comment added",
+      comments: loop.comments,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
