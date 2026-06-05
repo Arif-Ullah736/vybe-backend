@@ -1,4 +1,5 @@
 const Loop = require("../models/loop.model");
+const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 exports.uploadLoop = async (req, res) => {
   try {
@@ -32,7 +33,7 @@ exports.uploadLoop = async (req, res) => {
     let cloudinaryResult;
 
     try {
-      cloudinaryResult = await uploadVideoToCloudinary(file.path, "loops");
+      cloudinaryResult = await uploadImageToCloudinary(file.path, "loops");
     } catch (uploadError) {
       console.log("❌ Cloudinary upload error:", uploadError);
 
