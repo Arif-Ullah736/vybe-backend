@@ -247,7 +247,7 @@ exports.savedPosts = async (req, res) => {
     } else {
       user.saved.push(postId);
       await user.save();
-      await populate("saved");
+      await user.populate("saved");
       return res.status(200).json({
         success: true,
         message: "post saved",
