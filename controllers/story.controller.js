@@ -79,3 +79,46 @@ exports.uploadStory = async (req, res) => {
     });
   }
 };
+
+exports.viewStory = async (req, res) => {
+  try {
+    const { storyId } = req.params;
+    const userId = req.user.id;
+
+    // 1. Find story
+    const story = await Story.findById(storyId);
+
+    if (!story) {
+      return res.status(404).json({
+        success: false,
+        message: "Story not found",
+      });
+    }
+
+    // 2. Check if user already viewed
+    const alreadyViewed = story.viewers.includes(userId);
+
+    if (!alreadyViewed) {
+      story.viewers.push(userId);
+      await story.save();
+    }
+
+    // 3. Populate for response
+    await story.populate("author", "name userName profileImage");
+
+    await story.populate("viewers", "name userName profileImage");
+
+    return res.status(200).json({
+      success: true,
+      message: alreadyViewed
+        ? "Story already viewed"
+        : "Story viewed successfully",
+      data: story,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};
