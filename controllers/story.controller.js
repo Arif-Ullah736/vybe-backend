@@ -122,3 +122,36 @@ exports.viewStory = async (req, res) => {
     });
   }
 };
+
+exports.getStoryByUsername = async (req, res) => {
+  try {
+    const { userName } = req.params;
+
+    // 1. Find user
+    const user = await User.findOne({ userName });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // 2. Find user's story (latest active story)
+    const story = await Story.findOne({
+      author: user._id,
+    })
+      .populate("author")
+      .populate("viewers");
+
+    return res.status(200).json({
+      success: true,
+      message: "User fetched successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};
