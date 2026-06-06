@@ -6,7 +6,7 @@ exports.uploadStory = async (req, res) => {
   try {
     const { mediaType } = req.body;
 
-    // 2. File check
+    // File check
     const file = req.file;
 
     if (!file) {
@@ -16,7 +16,7 @@ exports.uploadStory = async (req, res) => {
       });
     }
 
-    // 3. Upload to Cloudinary
+    // Upload to Cloudinary
     let cloudinaryResult;
 
     try {
@@ -35,18 +35,20 @@ exports.uploadStory = async (req, res) => {
       });
     }
 
+    // Check existing story
     const existingStory = await Story.findOne({
       author: req.user.id,
     });
 
+    // Delete old story if exists
     if (existingStory) {
       await Story.findByIdAndDelete(existingStory._id);
     }
 
-    // 4. Create expiry time (24 hours story)
+    // Story expires after 24 hours
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    // 5. Create story
+    // Create new story
     const story = await Story.create({
       author: req.user.id,
       media: cloudinaryResult.secure_url,
@@ -54,12 +56,16 @@ exports.uploadStory = async (req, res) => {
       expiresAt,
     });
 
-    // 6. Save in user (optional but useful)
-    await User.findByIdAndUpdate(req.user.id, {
-      $push: { story: story._id },
-    });
+    // Save single story reference in user
+    await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        story: story._id,
+      },
+      { new: true },
+    );
 
-    // 7. Populate author
+    // Populate fields
     await story.populate("author", "name userName profileImage");
     await story.populate("viewers", "name userName profileImage");
 
@@ -69,6 +75,8 @@ exports.uploadStory = async (req, res) => {
       data: story,
     });
   } catch (error) {
+    console.error("❌ UploadStory error:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message || "Internal server error",
