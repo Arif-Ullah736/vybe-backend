@@ -67,7 +67,7 @@ exports.uploadPost = async (req, res) => {
     // =========================
     // 6. Populate author safely
     // =========================
-    await post.populate("author", "name email profileImage");
+    await post.populate("author", "name userName email profileImage");
 
     // =========================
     // 7. Success response
@@ -93,7 +93,7 @@ exports.getAllPosts = async (req, res) => {
     // 1. Fetch all posts
     // =========================
     const posts = await Post.find()
-      .populate("author", "name email profileImage")
+      .populate("author", "name userName email profileImage")
       .sort({ createdAt: -1 }); // newest first
 
     // =========================
@@ -158,7 +158,7 @@ exports.likePost = async (req, res) => {
     post.likes.push(userId);
 
     await post.save();
-    await post.populate("author", "name email profileImage");
+    await post.populate("author", "name userName email profileImage");
 
     res.status(200).json({
       success: true,
@@ -205,7 +205,7 @@ exports.addComment = async (req, res) => {
 
     await post.save();
 
-    await post.populate("comments.author", "name email profileImage");
+    await post.populate("comments.author", "name userName email profileImage");
 
     res.status(201).json({
       success: true,
