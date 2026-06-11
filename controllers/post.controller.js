@@ -130,13 +130,20 @@ exports.likePost = async (req, res) => {
     const { postId } = req.params;
     const userId = req.user.id;
 
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate(
+      "author",
+      "name userName email profileImage",
+    );
 
     if (!post) {
       return res.status(404).json({
         success: false,
         message: "Post not found",
       });
+    }
+
+    if (!post.likes) {
+      post.likes = [];
     }
 
     const alreadyLiked = post.likes.includes(userId);
@@ -146,11 +153,12 @@ exports.likePost = async (req, res) => {
       post.likes = post.likes.filter((id) => id.toString() !== userId);
 
       await post.save();
+      await post.populate("author", "name userName email profileImage");
 
       return res.status(200).json({
         success: true,
         message: "Post unliked",
-        likesCount: post.likes.length,
+        data: post,
       });
     }
 
@@ -163,7 +171,7 @@ exports.likePost = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Post liked",
-      likesCount: post.likes.length,
+      data: post,
     });
   } catch (error) {
     res.status(500).json({
