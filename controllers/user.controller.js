@@ -165,3 +165,73 @@ exports.editProfile = async (req, res) => {
     });
   }
 };
+
+exports.follow = async (req, res) => {
+  try {
+    const currentUserId = req.user._id || req.user.id;
+    const targetUserId = req.params.targetUserId;
+
+    //  check current user is exist
+    if (!targetUserId) {
+      return res.status(404).json({
+        success: false,
+        message: "target user  is not found",
+      });
+    }
+
+    //  check target user is exist
+    if (currentUserId === targetUserId) {
+      return res.status(404).json({
+        success: false,
+        message: "You cannot follow yourself",
+      });
+    }
+
+    // find current and target user
+    const currentUser = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    // check current user already follow target user then unfollow it
+    const isFollowing = currentUser.following.includes(targetUserId);
+
+    if (isFollowing) {
+      // remove target user from the currrent user following list
+      currentUser.following = currentUser.following.filter(
+        (id) => id !== targetUserId,
+      );
+
+      // remove current  user from the target user follwers  list
+      targetUser.followers = targetUser.followers.filter(
+        (id) => id !== currentUserId,
+      );
+      await currentUser.save();
+      await targetUser.save();
+
+      return res.status(200).json({
+        success: true,
+        following: false,
+        message: "traget user unfollowed successfully",
+      });
+    } else {
+      currentUser.following.push(targetUserId);
+      targetUser.followers.push(currentUserId);
+
+      await currentUser.save();
+      await targetUser.save();
+
+      return res.status(200).json({
+        success: true,
+        following: true,
+        message: "user followed successfully",
+      });
+    }
+
+    //
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "somethimg went wrong ...",
+    });
+  }
+};
