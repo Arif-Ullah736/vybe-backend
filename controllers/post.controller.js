@@ -213,12 +213,14 @@ exports.addComment = async (req, res) => {
 
     await post.save();
 
+    // Populate both post author and all comment authors
+    await post.populate("author", "name userName email profileImage");
     await post.populate("comments.author", "name userName email profileImage");
 
     res.status(201).json({
       success: true,
       message: "Comment added",
-      comments: post.comments,
+      data: post,
     });
   } catch (error) {
     res.status(500).json({
