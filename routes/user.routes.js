@@ -17,5 +17,6 @@ router.post(
 router.get("/getUser", auth, userController.getUser);
 router.get("/suggestedUsers", auth, userController.suggestedUsers);
 router.get("/getProfile/:userName", auth, userController.getProfile);
+router.get("/follow/:targetUserId", auth, userController.follow);
 
 module.exports = router;
