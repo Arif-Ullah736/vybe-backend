@@ -193,16 +193,15 @@ exports.follow = async (req, res) => {
 
     // check current user already follow target user then unfollow it
     const isFollowing = currentUser.following.includes(targetUserId);
-
     if (isFollowing) {
       // remove target user from the currrent user following list
       currentUser.following = currentUser.following.filter(
-        (id) => id !== targetUserId,
+        (id) => id.toString() !== targetUserId,
       );
 
       // remove current  user from the target user follwers  list
       targetUser.followers = targetUser.followers.filter(
-        (id) => id !== currentUserId,
+        (id) => id.toString() !== currentUserId,
       );
       await currentUser.save();
       await targetUser.save();
