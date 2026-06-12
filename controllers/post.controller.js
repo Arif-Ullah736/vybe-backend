@@ -94,6 +94,7 @@ exports.getAllPosts = async (req, res) => {
     // =========================
     const posts = await Post.find()
       .populate("author", "name userName email profileImage")
+      .populate("comments.author", "name userName email profileImage")
       .sort({ createdAt: -1 }); // newest first
 
     // =========================
@@ -253,14 +254,15 @@ exports.savedPosts = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "post unsaved",
+        data: user,
       });
     } else {
       user.saved.push(postId);
       await user.save();
-      await user.populate("saved");
       return res.status(200).json({
         success: true,
         message: "post saved",
+        data: user,
       });
     }
   } catch (error) {
