@@ -56,7 +56,9 @@ exports.suggestedUsers = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const userName = req.params.userName;
-    const profile = await User.findOne({ userName }).select("-password");
+    const profile = await User.findOne({ userName })
+      .select("-password")
+      .populate("posts loop followers following");
     if (!profile) {
       return res.status(404).json({
         success: false,
