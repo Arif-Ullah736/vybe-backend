@@ -189,3 +189,25 @@ exports.addLoopComment = async (req, res) => {
     });
   }
 };
+
+exports.getAllLoops = async (req, res) => {
+  try {
+    const loops = await Loop.find()
+      .populate("author", "name email profileImage")
+      .populate("comments.author", "name email profileImage")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: loops.length,
+      data: loops,
+    });
+  } catch (error) {
+    console.log("❌ Get All Loops Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};

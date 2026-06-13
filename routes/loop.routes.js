@@ -8,6 +8,7 @@ const {
   uploadLoop,
   likeLoop,
   addLoopComment,
+  getAllLoops,
 } = require("../controllers/loop.controller");
 
 // Upload Loop
@@ -18,5 +19,7 @@ router.post("/like/:loopId", auth, likeLoop);
 
 // Add Comment
 router.post("/comment/:loopId", auth, addLoopComment);
+
+router.get("/getAllLoops", getAllLoops);
 
 module.exports = router;
