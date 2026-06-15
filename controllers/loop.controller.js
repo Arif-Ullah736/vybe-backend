@@ -193,7 +193,7 @@ exports.addLoopComment = async (req, res) => {
 exports.getAllLoops = async (req, res) => {
   try {
     const loops = await Loop.find()
-      .populate("author", "name email profileImage")
+      .populate("author", "name userName email profileImage")
       .populate("comments.author", "name email profileImage")
       .sort({ createdAt: -1 });
 
