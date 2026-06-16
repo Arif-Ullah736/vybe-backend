@@ -128,7 +128,8 @@ exports.likeLoop = async (req, res) => {
     loop.likes.push(userId);
 
     await loop.save();
-    await loop.populate("author", "name email profileImage");
+    await loop.populate("author", "name userName email profileImage");
+    await loop.populate("comments.author");
 
     return res.status(200).json({
       success: true,
@@ -194,7 +195,7 @@ exports.getAllLoops = async (req, res) => {
   try {
     const loops = await Loop.find()
       .populate("author", "name userName email profileImage")
-      .populate("comments.author", "name email profileImage")
+      .populate("comments.author", "name userName email profileImage")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({

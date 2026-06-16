@@ -15,7 +15,7 @@ const {
 router.post("/upload", auth, upload.single("video"), uploadLoop);
 
 // Like / Unlike Loop
-router.post("/like/:loopId", auth, likeLoop);
+router.get("/like/:loopId", auth, likeLoop);
 
 // Add Comment
 router.post("/comment/:loopId", auth, addLoopComment);
