@@ -161,3 +161,27 @@ exports.viewStory = async (req, res) => {
     });
   }
 };
+
+exports.getStories = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    const stories = await Story.find({
+      author: { $in: user.following },
+    })
+      .populate("author", "name userName profileImage")
+      .populate("viewers", "name userName profileImage")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "stories fetched succesfully",
+      data: stories,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};

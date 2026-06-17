@@ -8,6 +8,7 @@ const {
   uploadStory,
   viewStory,
   getStoryByUsername,
+  getStories,
 } = require("../controllers/story.controller");
 
 // =========================
@@ -24,5 +25,10 @@ router.post("/view/:storyId", auth, viewStory);
 // Get Story by Username
 // =========================
 router.get("/getStory/:userName", auth, getStoryByUsername);
+
+// =========================
+// Get Stories
+// =========================
+router.get("/getStories", auth, getStories);
 
 module.exports = router;
