@@ -34,7 +34,7 @@ exports.getUser = async (req, res) => {
 
 exports.suggestedUsers = async (req, res) => {
   try {
-    const currentUserId = req.userId;
+    const currentUserId = req.user._id || req.user.id;
 
     const users = await User.find({
       _id: { $ne: currentUserId },
