@@ -38,7 +38,9 @@ exports.suggestedUsers = async (req, res) => {
 
     const users = await User.find({
       _id: { $ne: currentUserId },
-    }).select("-password");
+    })
+      .select("-password")
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,

@@ -105,6 +105,14 @@ exports.getStoryByUsername = async (req, res) => {
       .populate("author")
       .populate("viewers");
 
+    if (!story) {
+      return res.status(404).json({
+        success: false,
+        message: "Story not found or has expired",
+        data: null,
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "User fetched successfully",
