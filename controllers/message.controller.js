@@ -82,3 +82,33 @@ export const getAllMessages = async (req, res) => {
     });
   }
 };
+
+export const getChatUsers = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const conversations = await Conversation.find({
+      participants: userId,
+    })
+      .populate("participants", "username profilePic email")
+      .sort({ updatedAt: -1 });
+
+    const users = conversations.map((conversation) =>
+      conversation.participants.find(
+        (participant) => participant._id.toString() !== userId,
+      ),
+    );
+
+    return res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    console.error("Get Chat Users Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
