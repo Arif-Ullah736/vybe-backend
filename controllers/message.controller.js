@@ -52,3 +52,33 @@ export const sendMessage = async (req, res) => {
     });
   }
 };
+
+export const getAllMessages = async (req, res) => {
+  try {
+    const sender = req.user.id;
+    const receiver = req.params.receiverId;
+
+    const conversation = await Conversation.findOne({
+      participants: { $all: [sender, receiver] },
+    }).populate("messages");
+
+    if (!conversation) {
+      return res.status(200).json({
+        success: true,
+        messages: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      messages: conversation.messages,
+    });
+  } catch (error) {
+    console.error("Get Messages Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
