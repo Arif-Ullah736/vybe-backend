@@ -19,7 +19,7 @@ router.post("/upload", auth, upload.single("media"), uploadStory);
 // =========================
 // View Story
 // =========================
-router.post("/view/:storyId", auth, viewStory);
+router.get("/view/:storyId", auth, viewStory);
 
 // =========================
 // Get Story by Username
