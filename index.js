@@ -12,6 +12,7 @@ const userRoutes = require("./routes/user.routes");
 const postRoutes = require("./routes/post.routes");
 const loopRoutes = require("./routes/loop.routes");
 const storyRoutes = require("./routes/story.routes");
+const messageRoutes = require("./routes/message.routes");
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/post", postRoutes);
 app.use("/api/v1/loop", loopRoutes);
 app.use("/api/v1/story", storyRoutes);
+app.use("/api/v1/message", messageRoutes);
 
 app.get("/", (req, res) => {
   return res.json({
