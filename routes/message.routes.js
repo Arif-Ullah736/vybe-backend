@@ -1,11 +1,11 @@
-import express from "express";
-import {
+const express = require("express");
+const {
   sendMessage,
   getAllMessages,
   getChatUsers,
-} from "../controllers/message.controller.js";
-import { auth } from "../middlewares/auth.middleware.js";
-import upload from "../middlewares/multer.js";
+} = require("../controllers/message.controller.js");
+const { auth } = require("../middlewares/auth.middleware.js");
+const upload = require("../middlewares/multer.js");
 
 const router = express.Router();
 
@@ -18,4 +18,4 @@ router.get("/getAllMessages/:receiverId", auth, getAllMessages);
 // Send message to a user
 router.post("/send/:receiverId", auth, upload.single("image"), sendMessage);
 
-export default router;
+module.exports = router;

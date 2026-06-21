@@ -1,8 +1,8 @@
-import Message from "../models/message.model.js";
-import Conversation from "../models/conversation.model.js";
-import { uploadImageToCloudinary } from "../utils/imageUploader.js";
+const Message = require("../models/message.model");
+const Conversation = require("../models/conversation.model");
+const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
-export const sendMessage = async (req, res) => {
+exports.sendMessage = async (req, res) => {
   try {
     const sender = req.user.id;
     const receiver = req.params.receiverId;
@@ -53,7 +53,7 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-export const getAllMessages = async (req, res) => {
+exports.getAllMessages = async (req, res) => {
   try {
     const sender = req.user.id;
     const receiver = req.params.receiverId;
@@ -83,7 +83,7 @@ export const getAllMessages = async (req, res) => {
   }
 };
 
-export const getChatUsers = async (req, res) => {
+exports.getChatUsers = async (req, res) => {
   try {
     const userId = req.user.id;
 
